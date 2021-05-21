@@ -1,5 +1,6 @@
 include("../vector/vector.jl")
 include("../primitives/sphere.jl")
+include("../scene/scene.jl")
 
 struct Ray{T <: AbstractFloat}
 
@@ -34,18 +35,12 @@ function backgroundColor(direction)
     (1-t)RGB(1.0, 1.0, 1.0) + t * RGB(0.5, 0.7, 1.0)
 end
 
-function raycolor(ray::Ray, sphere::Sphere)
-    t = hitSphere(sphere, ray) 
-    if t > 0
-        # ponto de intersecção do raio na esfera
-        intersectPoint = rayAt(ray, t)
-        # normal da esfera nesse ponto de intersecção
-        normal = normalize(intersectPoint - sphere.center)
+function raycolor(ray::Ray, scenelist::SceneList)
+    record = HitRecord()
+    if hitSphere!(scenelist, ray, 0.0, Inf, record) 
         # cor a partir da normal
-        ncolor = 0.5 * (normal .+ 1.0)
-        
+        ncolor = 0.5 * (record.normal .+ 1.0)        
         RGB(ncolor...)
-
     else
         backgroundColor(ray.direction)
     end
@@ -53,7 +48,7 @@ end
 
 ### Hit objects
 
-function hitSphere(sphere::Sphere, ray::Ray)
+function hitSphere!(sphere::Sphere, ray::Ray, tmin, tmax, record::HitRecord)
     # a  = normasquare(ray.direction)
     # OC = sphere.center - ray.origin
     # b  = 2.0 * dot(ray.direction, OC)
@@ -66,11 +61,50 @@ function hitSphere(sphere::Sphere, ray::Ray)
     delta = (halfb * halfb) - a * c
 
     if delta < 0 
-        -1.0
+        false
     else        
         # t = (-halfb - √delta / a)
-        (-halfb - √delta / a)
+        # (-halfb - √delta / a)        
+        t = (-halfb - √delta) / a
+        if t < tmin || t > tmax
+            t = (-halfb + √delta) / a
+            if t < tmin || t > tmax
+                return false
+            end
+        end
+        record.t = t
+        # ponto de intersecção do raio na esfera
+        record.intersectPoint = rayAt(ray, t)  
+        # normal da esfera nesse ponto de intersecção              
+        outward_normal = normalize(record.intersectPoint - sphere.center)
+        
+        front_face = dot(ray.direction, outward_normal)
+        if front_face < 0
+            record.normal = outward_normal
+        else
+            record.normal = -outward_normal
+        end
+        true
     end
+end
+
+function hitSphere!(scenelist::SceneList, ray::Ray, tmin, tmax, record::HitRecord)
+    hitanything = false
+    auxRecord = HitRecord()
+    closestofar = tmax
+
+    for object in scenelist.objects
+        if hitSphere!(object, ray, tmin, closestofar, auxRecord)
+            hitanything = true
+            closestofar = auxRecord.t
+
+            record.intersectPoint = auxRecord.intersectPoint
+            record.t = auxRecord.t
+            record.normal = auxRecord.normal
+
+        end            
+    end
+    hitanything
 end
 
 

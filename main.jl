@@ -28,7 +28,13 @@ println("\thorizontal(",horizontal,")")
 println("\tfocal lenght(",focallenght,")")
 println("\tlower left corner(",lowerleftcorner,")")
 
-sphere = Sphere(vec3(0.0, 0.0, -1.0), 0.5)
+bigradius = 1000.0
+sphere = Sphere(vec3(0.0,     0.0, -1.0), 0.5)
+floor  = Sphere(vec3(0.0, -bigradius - 0.5, -1.0), bigradius)
+
+world = SceneList()
+push!(world, sphere)
+push!(world, floor)
 
 for j = 1:imgHeight
     for i = 1:imgWidth
@@ -37,11 +43,11 @@ for j = 1:imgHeight
         v = 1.0 - (j - 1) / (imgHeight - 1)
         dir = lowerleftcorner + u * horizontal + v * vertical - origin
         ray = Ray(origin, dir)
-        imgData[j, i] = raycolor(ray, sphere)
+        imgData[j, i] = raycolor(ray, world)
 
     end
 end
 
 
-save("rendered/image3.png", imgData)
+save("rendered/image4.png", imgData)
 
