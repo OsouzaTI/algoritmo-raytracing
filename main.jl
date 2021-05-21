@@ -43,5 +43,5 @@ for j = 1:imgHeight
 end
 
 
-save("rendered/image2.png", imgData)
+save("rendered/image3.png", imgData)
 

@@ -19,6 +19,12 @@ function Ray(ori::vec3{T}, dir::vec3{T}) where T
     Ray{T}(ori, dir)
 end
 
+function rayAt(ray::Ray, t::Real)
+    # retorna o vetor do raio em função 
+    # de um valor arbitrário 't'
+    ray.origin + t * ray.direction
+end
+
 function backgroundColor(direction)
     # é sabido que a câmera varia dentre -1 a 1
     # então ao somar 1 em y, a variação ocorrerá
@@ -29,8 +35,17 @@ function backgroundColor(direction)
 end
 
 function raycolor(ray::Ray, sphere::Sphere)
-    if hitSphere(sphere, ray)
-        RGB(1.0, 0.0, 0.0)
+    t = hitSphere(sphere, ray) 
+    if t > 0
+        # ponto de intersecção do raio na esfera
+        intersectPoint = rayAt(ray, t)
+        # normal da esfera nesse ponto de intersecção
+        normal = normalize(intersectPoint - sphere.center)
+        # cor a partir da normal
+        ncolor = 0.5 * (normal .+ 1.0)
+        
+        RGB(ncolor...)
+
     else
         backgroundColor(ray.direction)
     end
@@ -39,19 +54,23 @@ end
 ### Hit objects
 
 function hitSphere(sphere::Sphere, ray::Ray)
+    # a  = normasquare(ray.direction)
+    # OC = sphere.center - ray.origin
+    # b  = 2.0 * dot(ray.direction, OC)
+    # c  = normasquare(OC) - sphere.radius^2 
     a  = normasquare(ray.direction)
-    CO = sphere.center - ray.origin
-    b  = 2.0 * dot(ray.direction, CO)
-    c  = normasquare(CO) - sphere.radius^2 
+    OC = ray.origin - sphere.center
+    halfb  = dot(ray.direction, OC)
+    c  = normasquare(OC) - sphere.radius^2 
 
-    delta = (b * b) - 4 * a * c
+    delta = (halfb * halfb) - a * c
 
     if delta < 0 
-        false
-    else
-        true
+        -1.0
+    else        
+        # t = (-halfb - √delta / a)
+        (-halfb - √delta / a)
     end
-
 end
 
 
