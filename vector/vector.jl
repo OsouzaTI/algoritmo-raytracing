@@ -47,3 +47,6 @@ end
 function normalize(u::vec3)
     u / norma(u)
 end
+
+# constantes
+VEC3_NULO = vec3(0.0, 0.0, 0.0)
