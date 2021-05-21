@@ -1,6 +1,7 @@
 using Images
 include("vector/vector.jl")
 include("ray/ray.jl")
+include("primitives/sphere.jl")
 
 # constantes
 aspectratio = 16 / 9
@@ -27,6 +28,8 @@ println("\thorizontal(",horizontal,")")
 println("\tfocal lenght(",focallenght,")")
 println("\tlower left corner(",lowerleftcorner,")")
 
+sphere = Sphere(vec3(0.0, 0.0, -1.0), 0.5)
+
 for j = 1:imgHeight
     for i = 1:imgWidth
                 
@@ -34,11 +37,11 @@ for j = 1:imgHeight
         v = 1.0 - (j - 1) / (imgHeight - 1)
         dir = lowerleftcorner + u * horizontal + v * vertical - origin
         ray = Ray(origin, dir)
-        imgData[j, i] = raycolor(ray)
+        imgData[j, i] = raycolor(ray, sphere)
 
     end
 end
 
 
-save("rendered/image1.png", imgData)
+save("rendered/image2.png", imgData)
 
