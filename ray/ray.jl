@@ -1,6 +1,7 @@
 include("../vector/vector.jl")
 include("../primitives/sphere.jl")
 include("../scene/scene.jl")
+include("../colors/colors.jl")
 
 struct Ray{T <: AbstractFloat}
 
@@ -32,18 +33,23 @@ function backgroundColor(direction)
     # entre 0 a 2. Basta multiuplicar 1/2 e obteremos 
     # nosso parâmetro 't' da combinação convexa
     t = 0.5 * (direction[2] + 1.0)
-    (1-t)RGB(1.0, 1.0, 1.0) + t * RGB(0.5, 0.7, 1.0)
+    # (1-t)RGB(0.7, 0.8, 0.9) + t * RGB(0.05, 0.0, 0.2)
+    (1-t)MARS + t * RGB(0.2, 0.0, 0.05)
 end
 
 function raycolor(ray::Ray, scenelist::SceneList)
     record = HitRecord()
-    if hitSphere!(scenelist, ray, 0.0, Inf, record) 
-        # cor a partir da normal
-        ncolor = 0.5 * (record.normal .+ 1.0)        
-        RGB(ncolor...)
-    else
-        backgroundColor(ray.direction)
+
+    origin = ray.origin
+    direction = ray.direction
+    while hitSphere!(scenelist, Ray(origin, direction), 0.0001, Inf, record) 
+        direction = normalize(reflect(direction, record.normal))
+        origin = record.intersectPoint
+        # # cor a partir da normal
+        # ncolor = 0.5 * (record.normal .+ 1.0)        
+        # RGB(ncolor...)
     end
+    backgroundColor(direction)
 end
 
 ### Hit objects
@@ -107,6 +113,10 @@ function hitSphere!(scenelist::SceneList, ray::Ray, tmin, tmax, record::HitRecor
     hitanything
 end
 
+# função de reflexão de um raio
+function reflect(direction::vec3, normal::vec3)
+    direction - 2 * dot(direction, normal) * normal;
+end
 
 # u = vec3(1.0, 2.0, 3.0)
 # v = vec3(7.0, 0.0, 0.0)

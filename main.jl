@@ -29,11 +29,17 @@ println("\tfocal lenght(",focallenght,")")
 println("\tlower left corner(",lowerleftcorner,")")
 
 bigradius = 1000.0
-sphere = Sphere(vec3(0.0,     0.0, -1.0), 0.5)
+sphere = Sphere(vec3(0.0,     0.0, -1.5), 0.5)
+sphere1 = Sphere(vec3(-1.0,   0.0, -2.0), 0.5)
+sphere2 = Sphere(vec3(0.5,   1.5,  -1.5), 0.5)
+sphere3 = Sphere(vec3(2.5,   0.2,  -1.0), 0.4)
 floor  = Sphere(vec3(0.0, -bigradius - 0.5, -1.0), bigradius)
 
 world = SceneList()
 push!(world, sphere)
+push!(world, sphere1)
+push!(world, sphere2)
+push!(world, sphere3)
 push!(world, floor)
 
 for j = 1:imgHeight
@@ -49,5 +55,5 @@ for j = 1:imgHeight
 end
 
 
-save("rendered/image4.png", imgData)
+save("rendered/image8.png", imgData)
 
