@@ -1,4 +1,4 @@
-using Images
+using Images, ProgressMeter
 include("vector/vector.jl")
 include("ray/ray.jl")
 include("primitives/sphere.jl")
@@ -7,7 +7,6 @@ include("primitives/sphere.jl")
 aspectratio = 16 / 9
 imgWidth = 800
 imgHeight = trunc(Int64, imgWidth/aspectratio)
-imgData = RGB.(zeros(imgHeight, imgWidth))
 
 # câmera
 viewportheight  = 2.0
@@ -42,18 +41,24 @@ push!(world, sphere2)
 push!(world, sphere3)
 push!(world, floor)
 
-for j = 1:imgHeight
-    for i = 1:imgWidth
-                
-        u = (i - 1) / (imgWidth - 1)
-        v = 1.0 - (j - 1) / (imgHeight - 1)
-        dir = lowerleftcorner + u * horizontal + v * vertical - origin
-        ray = Ray(origin, dir)
-        imgData[j, i] = raycolor(ray, world)
-
+function render(samplesPerPixel=100)
+    imgData = RGB.(zeros(imgHeight, imgWidth))
+    @showprogress "Renderizando..." for j = 1:imgHeight
+        for i = 1:imgWidth
+            color = RGB(0.0, 0.0, 0.0)
+            for k = 1:samplesPerPixel                          
+                u = (i - 1 + rand()) / (imgWidth - 1)
+                v = 1.0 - (j - 1 + rand()) / (imgHeight - 1)
+                dir = lowerleftcorner + u * horizontal + v * vertical - origin
+                ray = Ray(origin, dir)
+                color += raycolor(ray, world)
+            end
+            imgData[j, i] = color/samplesPerPixel
+        end
     end
+    imgData
 end
 
-
-save("rendered/image8.png", imgData)
+frame = render()
+save("rendered/image9.png", frame)
 
