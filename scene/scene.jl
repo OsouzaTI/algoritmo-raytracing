@@ -1,17 +1,18 @@
 import Base.push!
 
 include("../vector/vector.jl")
+include("../material/material.jl")
 
-abstract type SceneObject
-
-end
+abstract type SceneObject end
 
 mutable struct HitRecord{T <: AbstractFloat}
     intersectPoint::vec3{T}
     t::T
     normal::vec3{T}
+    frontFace::Bool
+    material::Material
     function HitRecord{T}(p::vec3{T}, t::T, normal::vec3{T}) where T
-        new(p, t, normal)
+        new(p, t, normal, false, Metal(RGB(0.0, 0.0, 0.0)))
     end
 end
 

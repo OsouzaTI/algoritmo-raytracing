@@ -1,0 +1,6 @@
+include("vector/vector.jl")
+include("ray/ray.jl")
+include("scene/scene.jl")
+include("primitives/sphere.jl")
+include("colors/colors.jl")
+include("material/material.jl")

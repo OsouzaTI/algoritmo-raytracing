@@ -1,7 +1,5 @@
 using Images, ProgressMeter
-include("vector/vector.jl")
-include("ray/ray.jl")
-include("primitives/sphere.jl")
+include("libs.jl")
 
 # constantes
 aspectratio = 16 / 9
@@ -28,22 +26,22 @@ println("\tfocal lenght(",focallenght,")")
 println("\tlower left corner(",lowerleftcorner,")")
 
 bigradius = 1000.0
-sphere = Sphere(vec3(0.0,     0.0, -1.5), 0.5)
-sphere1 = Sphere(vec3(-1.0,   0.0, -2.0), 0.5)
-sphere2 = Sphere(vec3(0.5,   1.5,  -1.5), 0.5)
-sphere3 = Sphere(vec3(2.5,   0.2,  -1.0), 0.4)
-floor  = Sphere(vec3(0.0, -bigradius - 0.5, -1.0), bigradius)
+sphere = Sphere(vec3(0.0,     0.0, -1.5), 0.5, Metal(RGB(1.0, 1.0, 1.0)))
+# sphere1 = Sphere(vec3(-1.0,   0.0, -2.0), 0.5, Metal)
+# sphere2 = Sphere(vec3(0.5,   1.5,  -1.5), 0.5, Metal)
+# sphere3 = Sphere(vec3(2.5,   0.2,  -1.0), 0.4, Metal)
+floor  = Sphere(vec3(0.0, -bigradius - 0.5, -1.0), bigradius, Metal(RGB(0.0, 0.5, 0.0)))
 
 world = SceneList()
 push!(world, sphere)
-push!(world, sphere1)
-push!(world, sphere2)
-push!(world, sphere3)
+# push!(world, sphere1)
+# push!(world, sphere2)
+# push!(world, sphere3)
 push!(world, floor)
 
-function render(samplesPerPixel=100)
+function render(samplesPerPixel=100, maxdepth=50)
     imgData = RGB.(zeros(imgHeight, imgWidth))
-    @showprogress "Renderizando..." for j = 1:imgHeight
+    @showprogress 1 "Renderizando..." for j = 1:imgHeight
         for i = 1:imgWidth
             color = RGB(0.0, 0.0, 0.0)
             for k = 1:samplesPerPixel                          
@@ -51,7 +49,7 @@ function render(samplesPerPixel=100)
                 v = 1.0 - (j - 1 + rand()) / (imgHeight - 1)
                 dir = lowerleftcorner + u * horizontal + v * vertical - origin
                 ray = Ray(origin, dir)
-                color += raycolor(ray, world)
+                color += raycolor(ray, world, maxdepth)
             end
             imgData[j, i] = color/samplesPerPixel
         end
@@ -59,6 +57,6 @@ function render(samplesPerPixel=100)
     imgData
 end
 
-frame = render()
-save("rendered/image9.png", frame)
+frame = render(100)
+save("rendered/image10.png", frame)
 
